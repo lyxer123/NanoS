@@ -130,3 +130,24 @@
 - IO 稳定优先：尽量不调整 `ESP32-S3` 既有引脚分配。
 - 扩展外置化：将复杂外设和协议适配集中在 `STM32` 侧实现。
 - 架构可切换：支持多种网络拓扑，便于按成本与场景选择方案。
+
+---
+
+## 4g_nic 代码集成状态
+
+已参考 `esp-iot-bridge/examples/4g_nic` 完成最小集成，新增：
+
+- `CMakeLists.txt`
+- `main/app_main.c`
+- `main/CMakeLists.txt`
+- `main/idf_component.yml`
+- `sdkconfig.defaults`
+- `sdkconfig.defaults.esp32s3`
+
+默认策略为：
+
+- 上联网（WAN）：`4G modem`
+- 转发口（LAN）：`Ethernet`（可用于 `W5500` 路径）
+- 开启 `IP_FORWARD + NAPT + PPP`，用于 NAT 转发
+
+可在 `menuconfig` 中按硬件实际切换 `Modem(UART/USB)` 和转发口类型。
