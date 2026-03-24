@@ -372,7 +372,12 @@ static esp_err_t esp_bridge_eth_reset_phy(void)
 
 static esp_err_t eth_netif_dhcp_status_change_cb(esp_ip_addr_t *ip_info)
 {
+#if CONFIG_BRIDGE_USE_SPI_ETHERNET
+    ESP_LOGW(TAG, "Skip PHY reset on DHCP status change for SPI Ethernet");
+    return ESP_OK;
+#else
     return esp_bridge_eth_reset_phy();
+#endif
 }
 
 static void eth_driver_free_rx_buffer(void *h, void* buffer)

@@ -1,0 +1,42 @@
+diff --git a/src/bridge_modem.c b/src/bridge_modem.c
+index 0000000..0000000 100644
+--- a/src/bridge_modem.c
++++ b/src/bridge_modem.c
+@@ -203,11 +203,23 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
+     }
+ #endif
+ 
+     int rssi, ber;
+-    esp_err_t err = esp_modem_get_signal_quality(dce, &rssi, &ber);
+-    if (err != ESP_OK) {
+-        ESP_LOGE(TAG, "esp_modem_get_signal_quality failed with %d %s", err, esp_err_to_name(err));
+-        esp_modem_destroy(dce);
+-        esp_netif_destroy(esp_netif);
+-        vEventGroupDelete(event_group);
+-        event_group = NULL;
+-        return NULL;
++    esp_err_t err = ESP_FAIL;
++    int attempts = 3;
++    while (attempts > 0) {
++        err = esp_modem_get_signal_quality(dce, &rssi, &ber);
++        if (err == ESP_OK) {
++            ESP_LOGI(TAG, "Signal quality: rssi=%d, ber=%d", rssi, ber);
++            break;
++        }
++        ESP_LOGE(TAG, "esp_modem_get_signal_quality failed with %d %s, attempts left: %d", err, esp_err_to_name(err), attempts - 1);
++        attempts--;
++        if (attempts > 0) {
++            vTaskDelay(pdMS_TO_TICKS(1000));
++        }
++    }
++    if (err != ESP_OK) {
++        ESP_LOGE(TAG, "esp_modem_get_signal_quality failed after 3 attempts");
++        esp_modem_destroy(dce);
++        esp_netif_destroy(esp_netif);
++        vEventGroupDelete(event_group);
++        event_group = NULL;
++        return NULL;
+     }
+-    ESP_LOGI(TAG, "Signal quality: rssi=%d, ber=%d", rssi, ber);
+ 
+     err = esp_modem_set_mode(dce, ESP_MODEM_MODE_DATA);

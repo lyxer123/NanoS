@@ -1,0 +1,16 @@
+diff --git a/cmake/patch_utils.cmake b/cmake/patch_utils.cmake
+index 0000000..0000000 100644
+--- a/cmake/patch_utils.cmake
++++ b/cmake/patch_utils.cmake
+@@ -70,7 +70,11 @@ function(apply_patches_from_list)
+             if("${current_path}" MATCHES "^esp-idf")
+                 if("$ENV{IDF_PATH}" STREQUAL "")
+                     message(FATAL_ERROR "IDF_PATH environment variable is not set")
+                 endif()
+-                string(REGEX REPLACE "^esp-idf" "$ENV{IDF_PATH}" current_path "${current_path}")
++                # Normalize IDF_PATH to forward slashes to avoid backslash
++                # escape sequences in regex replacement on Windows.
++                set(_idf_path_raw "$ENV{IDF_PATH}")
++                file(TO_CMAKE_PATH "${_idf_path_raw}" _idf_path_norm)
++                string(REGEX REPLACE "^esp-idf" "${_idf_path_norm}" current_path "${current_path}")
+             endif()

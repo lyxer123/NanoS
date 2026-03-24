@@ -1,0 +1,21 @@
+diff --git a/src/bridge_modem.c b/src/bridge_modem.c
+index 0000000..0000000 100644
+--- a/src/bridge_modem.c
++++ b/src/bridge_modem.c
+@@ -117,7 +117,7 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
+     };
+     gpio_config(&io_config);
+     gpio_set_level(CONFIG_MODEM_RESET_GPIO, 0);
+-    vTaskDelay(pdMS_TO_TICKS(500));
++    vTaskDelay(pdMS_TO_TICKS(1500));
+     gpio_set_level(CONFIG_MODEM_RESET_GPIO, 1);
+ 
+     vTaskDelay(pdMS_TO_TICKS(MODULE_BOOT_TIME_MS));
+@@ -180,7 +180,7 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
+     assert(dce);
+     esp_modem_set_error_cb(dce, usb_terminal_error_handler);
+-    vTaskDelay(pdMS_TO_TICKS(1000)); // Although the DTE should be ready after USB enumeration, sometimes it fails to respond without this delay
++    vTaskDelay(pdMS_TO_TICKS(2000)); // Although the DTE should be ready after USB enumeration, sometimes it fails to respond without this delay
+ 
+ #else
+ #error Invalid serial connection to modem.
