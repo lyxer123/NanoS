@@ -4,7 +4,7 @@
 
 [English](README.md) | 中文
 
-`NanoS` 是一个基于 `ESP32-S3` 的多网络 NAT 与功能扩展平台，拟实现 AI 多种功能应用。
+`NanoS` 是一个基于 `ESP32-S3` 的多网络 NAT 与功能扩展平台，拟实现 AI 多种功能应用。（基于4g_nic例子）
 1. 本项目图标包含 `nano + os`，是微型操作系统的意思，logo 为nanos首字母 `n`，像一扇窗，也代表向世界揭示嵌入式的窗口。
 2. `nanos` 也是 `nano + system` 的集成，代表小系统的意思。
 
