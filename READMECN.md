@@ -2,28 +2,28 @@
 
 ![NanoS Logo](DOC/logov1.png)
 
-English | [中文](READMECN.md)
+[English](README.md) | 中文
 
-`NanoS` is a multi-network NAT and functional expansion platform based on `ESP32-S3`, designed for AI-enabled embedded applications.
-1. The project icon combines `nano + os`, meaning a tiny operating system. The logo is the letter `n`, like a serial gateway, also symbolizing an embedded "window" to the world.
-2. `NanoS` can also be interpreted as `nano + system`, representing a compact system.
+`NanoS` 是一个基于 `ESP32-S3` 的多网络 NAT 与功能扩展平台，拟实现 AI 多种功能应用。
+1. 本项目图标包含 `nano + os`，是微型操作系统的意思，logo 为nanos首字母 `n`，像一扇窗，也代表向世界揭示嵌入式的窗口。
+2. `nanos` 也是 `nano + system` 的集成，代表小系统的意思。
 
-Core goals:
+核心目标：
 
-- Enable `ESP32-S3` to support multiple uplink/downlink network forms (such as `W5500` and `USB 4G CAT1`).
-- Offload most expansion functions to `STM32` (`CAN`, multi-`UART`, `I2C`, `LoRa`, `SPI`, `RTC`, watchdog, and more).
-- Keep `ESP32-S3` IO pin assignments unchanged as much as possible to reduce hardware rework and migration cost.
-
----
-
-## Overall Architecture
-
-`ESP32-S3` works as the network and system controller, responsible for multi-network access, routing/NAT, and orchestration; `STM32` works as an extension bridge to handle peripherals and feature expansion.  
-By decoupling network-side and extension-side paths via SPI/USB, the platform can switch smoothly across different hardware topologies.
+- 让 `ESP32-S3` 同时支持多种上/下行网络形态（如 `W5500`、`USB 4G CAT1`）。
+- 通过 `STM32` 承载大部分功能扩展（`CAN`、多路 `UART`、`I2C`、`LoRa`、`SPI`、`RTC`、看门狗等）。
+- 在满足功能前提下，最大可能保持 `ESP32-S3` 的 IO 腿不变，降低硬件改版成本与迁移难度。
 
 ---
 
-## Diagram 1: Dual-Network Mode (W5500 + USB Hub + 4G CAT1 + STM32)
+## 项目整体思路
+
+`ESP32-S3` 作为网络与系统主控，负责多网络接入、路由/NAT、业务编排；`STM32` 作为扩展桥，集中接管外设与功能扩展。  
+通过 SPI/USB 等链路把网络侧与扩展侧解耦，使系统在不同硬件拓扑下可平滑切换。
+
+---
+
+## 框图 1：双网络模式（W5500 + USB Hub + 4G CAT1 + STM32）
 
 ```text
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
@@ -34,7 +34,7 @@ By decoupling network-side and extension-side paths via SPI/USB, the platform ca
                                    ▼                             ▼
                             ┌─────────────┐             ┌─────────────────────┐
                             │  4G CAT1    │             │  STM32F072C8T6      │
-                            └─────────────┘             │  (CDC / Extension)  │
+                            └─────────────┘             │  (CDC / 扩展桥)      │
                                                         └──────────┬──────────┘
                                                                    │
             ┌────────┬───────────┼───────────┬────────┬────────┬────────┐
@@ -72,7 +72,7 @@ By decoupling network-side and extension-side paths via SPI/USB, the platform ca
                                                        ▼                             ▼
                                            ┌─────────────┐             ┌─────────────────────┐
                                            │  4G CAT1    │             │  STM32F072C8T6      │
-                                           └─────────────┘             │  (CDC / Extension)  │
+                                           └─────────────┘             │  (CDC / 扩展桥)      │
                                                                        └──────────┬──────────┘
                                                                                   │
                                    ┌────────┬──────────────────┬─────────┬────────┼────────────┐
@@ -85,11 +85,11 @@ By decoupling network-side and extension-side paths via SPI/USB, the platform ca
                                                         │ function extend    │
                                                         └────────────────────┘
 ```
-Note: This mode emphasizes maximum network capability and is suitable when both `W5500` and `4G` are required.
+说明：该模式强调网络能力上限，适合同时需要 `W5500` 与 `4G` 的场景。
 
 ---
 
-## Diagram 2: Dual-USB Device Mode (USB Hub + USB NIC / USB 4G / USB Audio / STM32, choose two)
+## 框图 2：双 USB 设备模式（USB Hub + USB 网卡 / USB 4g 卡 / USB 声卡 / STM32，多选 2）
 
 ```text
                    ┌─────────────┐      ┌─────────────┐
@@ -100,7 +100,7 @@ Note: This mode emphasizes maximum network capability and is suitable when both 
                                 ▼                             ▼
                           ┌──────────────┐             ┌─────────────────────┐
                           │ USB Ethernet │             │  STM32F072C8T6      │
-                          │    card      │             │  (CDC / Extension)  │
+                          │    card      │             │  (CDC / 扩展桥)      │
                           └──────────────┘             └──────────┬──────────┘
                                                                   │
             ┌────────┬───────────┼───────────┬────────┬────────┬────────┐
@@ -123,7 +123,7 @@ Note: This mode emphasizes maximum network capability and is suitable when both 
                                 ▼                             ▼
                           ┌──────────────┐             ┌─────────────────────┐
                           │  4g cat1     │             │  STM32F072C8T6      │
-                          │              │             │  (CDC / Extension)  │
+                          │              │             │  (CDC / 扩展桥)      │
                           └──────────────┘             └──────────┬──────────┘
                                                                   │
             ┌────────┬───────────┼───────────┬────────┬────────┬────────┐
@@ -146,7 +146,7 @@ Note: This mode emphasizes maximum network capability and is suitable when both 
                                 ▼                             ▼
                           ┌──────────────┐             ┌─────────────────────┐
                           │  USB audio   │             │  STM32F072C8T6      │
-                          │    card      │             │  (CDC / Extension)  │
+                          │    card      │             │  (CDC / 扩展桥)      │
                           └──────────────┘             └──────────┬──────────┘
                                                                   │
             ┌────────┬───────────┼───────────┬────────┬────────┬────────┐
@@ -160,22 +160,22 @@ Note: This mode emphasizes maximum network capability and is suitable when both 
                                             └────────────────────┘
 ```
 
-Note: This mode focuses on unified expansion over USB and minimizes changes to existing `ESP32-S3` IO usage.
+说明：该模式重点是通过 USB 统一扩展，尽量减少对 `ESP32-S3` 原有 IO 的占用与改动。
 
 ---
 
-## Design Principles
+## 设计原则
 
-- Network capability first: prioritize stable and usable NAT/routing paths.
-- IO stability first: minimize changes to existing `ESP32-S3` pin assignments.
-- Externalized expansion: place complex peripherals and protocol adaptation on `STM32`.
-- Switchable architecture: support multiple network topologies for different cost and scenario needs.
+- 网络能力优先：优先保证 NAT/路由链路稳定可用。
+- IO 稳定优先：尽量不调整 `ESP32-S3` 既有引脚分配。
+- 扩展外置化：将复杂外设和协议适配集中在 `STM32` 侧实现。
+- 架构可切换：支持多种网络拓扑，便于按成本与场景选择方案。
 
 ---
 
-## 4g_nic Integration Status
+## 4g_nic 代码集成状态
 
-A minimal integration has been completed based on `esp-iot-bridge/examples/4g_nic`, adding:
+已参考 `esp-iot-bridge/examples/4g_nic` 完成最小集成，新增：
 
 - `CMakeLists.txt`
 - `main/app_main.c`
@@ -184,10 +184,10 @@ A minimal integration has been completed based on `esp-iot-bridge/examples/4g_ni
 - `sdkconfig.defaults`
 - `sdkconfig.defaults.esp32s3`
 
-Default strategy:
+默认策略为：
 
-- Uplink (WAN): `4G modem`
-- Forwarding interface (LAN): `Ethernet` (usable for `W5500` path)
-- Enable `IP_FORWARD + NAPT + PPP` for NAT forwarding
+- 上联网（WAN）：`4G modem`
+- 转发口（LAN）：`Ethernet`（可用于 `W5500` 路径）
+- 开启 `IP_FORWARD + NAPT + PPP`，用于 NAT 转发
 
-You can switch modem type (`UART/USB`) and forwarding interface type in `menuconfig` according to actual hardware.
+可在 `menuconfig` 中按硬件实际切换 `Modem(UART/USB)` 和转发口类型。

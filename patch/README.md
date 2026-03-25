@@ -1,5 +1,7 @@
 # Patch Directory
 
+English | [中文](readmeCN.md)
+
 This directory stores local patches for `managed_components`.
 
 ## Directory convention
@@ -15,6 +17,29 @@ This directory stores local patches for `managed_components`.
 - `espressif__iot_bridge`: local patches exist.
 - Other managed components: no local differences against official checksums.
 - Detailed report: `patch/component-diff-report.md`
+
+## Patch purpose by file
+
+`patch/espressif__iot_bridge/0001-fix-windows-idf-path-normalization.patch`
+
+- Main role: Fix patch path replacement on Windows in `patch_utils.cmake`.
+- Why needed: Backslashes in `%IDF_PATH%` can be interpreted as escape sequences by CMake regex replacement and break builds.
+- Effect: Converts `IDF_PATH` to CMake-style forward slashes before replacement, preventing `Unknown escape "\U"` type errors.
+
+`patch/espressif__iot_bridge/0002-avoid-spi-ethernet-phy-reset-on-dhcp-change.patch`
+
+- Main role: Prevent SPI Ethernet (W5500) PHY reset during DHCP status change.
+- Why needed: DHCP/DNS updates on WAN side could trigger an unnecessary PHY reset on LAN side, causing Ethernet link drops.
+- Effect: When `CONFIG_BRIDGE_USE_SPI_ETHERNET` is enabled, skip PHY reset and keep W5500 link stable.
+
+`patch/espressif__iot_bridge/0003-enhance-bridge-modem-stability-and-registration.patch`
+
+- Main role: Consolidate all local `bridge_modem.c` changes into one patch file.
+- Why needed: Keep modifications to the same source file in a single patch for easier maintenance, review, and conflict handling.
+- Effect:
+  - Increases modem reset and USB-ready wait delays.
+  - Adds retry logic (3 attempts) for `esp_modem_get_signal_quality()`.
+  - Registers PPP netif into bridge list via `esp_bridge_netif_list_add()` after IP wait.
 
 ## How to apply patches
 

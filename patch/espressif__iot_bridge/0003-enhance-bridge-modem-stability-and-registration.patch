@@ -2,6 +2,23 @@ diff --git a/src/bridge_modem.c b/src/bridge_modem.c
 index 0000000..0000000 100644
 --- a/src/bridge_modem.c
 +++ b/src/bridge_modem.c
+@@ -117,7 +117,7 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
+     };
+     gpio_config(&io_config);
+     gpio_set_level(CONFIG_MODEM_RESET_GPIO, 0);
+-    vTaskDelay(pdMS_TO_TICKS(500));
++    vTaskDelay(pdMS_TO_TICKS(1500));
+     gpio_set_level(CONFIG_MODEM_RESET_GPIO, 1);
+ 
+     vTaskDelay(pdMS_TO_TICKS(MODULE_BOOT_TIME_MS));
+@@ -180,7 +180,7 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
+     assert(dce);
+     esp_modem_set_error_cb(dce, usb_terminal_error_handler);
+-    vTaskDelay(pdMS_TO_TICKS(1000)); // Although the DTE should be ready after USB enumeration, sometimes it fails to respond without this delay
++    vTaskDelay(pdMS_TO_TICKS(2000)); // Although the DTE should be ready after USB enumeration, sometimes it fails to respond without this delay
+ 
+ #else
+ #error Invalid serial connection to modem.
 @@ -203,11 +203,23 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
      }
  #endif
@@ -40,3 +57,10 @@ index 0000000..0000000 100644
 -    ESP_LOGI(TAG, "Signal quality: rssi=%d, ber=%d", rssi, ber);
  
      err = esp_modem_set_mode(dce, ESP_MODEM_MODE_DATA);
+@@ -237,4 +249,5 @@ esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, uint8_t cus
+     /* Wait for IP address */
+     ESP_LOGI(TAG, "Waiting for IP address");
+     xEventGroupWaitBits(event_group, CONNECT_BIT | USB_DISCONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
++    esp_bridge_netif_list_add(esp_netif, NULL, NULL);
+     return esp_netif;
+ }

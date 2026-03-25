@@ -236,5 +236,6 @@ esp_netif_t *esp_bridge_create_modem_netif(esp_netif_ip_info_t *custom_ip_info, 
     /* Wait for IP address */
     ESP_LOGI(TAG, "Waiting for IP address");
     xEventGroupWaitBits(event_group, CONNECT_BIT | USB_DISCONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    esp_bridge_netif_list_add(esp_netif, NULL, NULL);
     return esp_netif;
 }
