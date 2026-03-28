@@ -26,11 +26,12 @@ This directory stores local patches for `managed_components`.
 - Why needed: Backslashes in `%IDF_PATH%` can be interpreted as escape sequences by CMake regex replacement and break builds.
 - Effect: Converts `IDF_PATH` to CMake-style forward slashes before replacement, preventing `Unknown escape "\U"` type errors.
 
-`patch/espressif__iot_bridge/0002-avoid-spi-ethernet-phy-reset-on-dhcp-change.patch`
+`patch/espressif__iot_bridge/0002-bridge_eth.patch`
 
-- Main role: Prevent SPI Ethernet (W5500) PHY reset during DHCP status change.
-- Why needed: DHCP/DNS updates on WAN side could trigger an unnecessary PHY reset on LAN side, causing Ethernet link drops.
-- Effect: When `CONFIG_BRIDGE_USE_SPI_ETHERNET` is enabled, skip PHY reset and keep W5500 link stable.
+- Main role: Single patch for **`src/bridge_eth.c`** (all local edits to that file merged together).
+- Contents:
+  - SPI Ethernet (W5500): skip PHY reset in `eth_netif_dhcp_status_change_cb` on WAN DHCP/DNS churn so LAN link stays up.
+  - `esp_bridge_create_eth_netif`: comment before `esp_netif_up` noting that **`esp_eth_start` already runs `esp_netif_action_start` / `netif_add` via glue** and must not be duplicated (otherwise lwIP asserts `netif already added`).
 
 `patch/espressif__iot_bridge/0003-enhance-bridge-modem-stability-and-registration.patch`
 

@@ -26,11 +26,12 @@
 - 原因：`%IDF_PATH%` 中的反斜杠在 CMake 正则替换中可能被当作转义，导致构建失败。
 - 效果：在替换前将 `IDF_PATH` 规范为 CMake 风格正斜杠，避免 `Unknown escape "\U"` 等错误。
 
-`patch/espressif__iot_bridge/0002-avoid-spi-ethernet-phy-reset-on-dhcp-change.patch`
+`patch/espressif__iot_bridge/0002-bridge_eth.patch`
 
-- 主要作用：避免 SPI Ethernet（W5500）在 DHCP 状态变化时被重置 PHY。
-- 原因：WAN 侧 DHCP/DNS 更新可能触发 LAN 侧不必要的 PHY 重置，导致以太网链路断开。
-- 效果：当启用 `CONFIG_BRIDGE_USE_SPI_ETHERNET` 时跳过 PHY 重置，保持 W5500 链路稳定。
+- 主要作用：对 **`src/bridge_eth.c` 的唯一补丁**（同一源文件的所有变更合并在此）。
+- 内容：
+  - SPI 以太网（W5500）：`eth_netif_dhcp_status_change_cb` 在 WAN DHCP/DNS 变化时**跳过 PHY 复位**，避免 LAN 链路被误拉断。
+  - `esp_bridge_create_eth_netif`：在 `esp_netif_up` 前增加注释，说明 **`esp_eth_start` 触发的 glue 已会 `esp_netif_action_start` / `netif_add`，不可再重复调用**（否则会触发 lwIP `netif already added` 断言）。
 
 `patch/espressif__iot_bridge/0003-enhance-bridge-modem-stability-and-registration.patch`
 

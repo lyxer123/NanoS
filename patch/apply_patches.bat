@@ -2,6 +2,8 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 rem Apply patch/<component>/*.patch to managed_components/<component>
+rem Note: Do not use :labels or goto inside "for ... do (...)" -- cmd reports
+rem       "此时不应有 :。" in that case.
 
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
@@ -30,45 +32,43 @@ for /R "%SCRIPT_DIR%" %%P in (*.patch) do (
 
     rem Get component folder name from patch parent dir
     for %%C in ("!PATCH_PARENT:~0,-1!") do set "COMPONENT=%%~nxC"
+
     if /I "!COMPONENT!"=="patch" (
         echo [WARN] Skip root-level patch file: "!PATCH_FILE!"
         set /a SKIP_COUNT+=1
-        goto :continue_loop
-    )
-
-    set "TARGET_DIR=%MANAGED_DIR%\!COMPONENT!"
-    if not exist "!TARGET_DIR!" (
-        echo [WARN] Component dir not found, skip: "!COMPONENT!"
-        set /a SKIP_COUNT+=1
-        goto :continue_loop
-    )
-
-    echo [INFO] Applying "!PATCH_FILE!" to "!TARGET_DIR!"
-    pushd "!TARGET_DIR!" >nul
-
-    git apply --reverse --check "!PATCH_FILE!" >nul 2>nul
-    if !errorlevel! EQU 0 (
-        echo [INFO] Already applied: "!PATCH_FILE!"
-        set /a SKIP_COUNT+=1
     ) else (
-        git apply --check "!PATCH_FILE!" >nul 2>nul
-        if !errorlevel! NEQ 0 (
-            echo [ERROR] Cannot apply patch cleanly: "!PATCH_FILE!"
-            set /a FAIL_COUNT+=1
+        set "TARGET_DIR=%MANAGED_DIR%\!COMPONENT!"
+        if not exist "!TARGET_DIR!" (
+            echo [WARN] Component dir not found, skip: "!COMPONENT!"
+            set /a SKIP_COUNT+=1
         ) else (
-            git apply "!PATCH_FILE!"
-            if !errorlevel! NEQ 0 (
-                echo [ERROR] Failed to apply patch: "!PATCH_FILE!"
-                set /a FAIL_COUNT+=1
+            echo [INFO] Applying "!PATCH_FILE!" to "!TARGET_DIR!"
+            pushd "!TARGET_DIR!" >nul
+
+            git apply --reverse --check "!PATCH_FILE!" >nul 2>nul
+            if !errorlevel! EQU 0 (
+                echo [INFO] Already applied: "!PATCH_FILE!"
+                set /a SKIP_COUNT+=1
             ) else (
-                echo [OK] Applied: "!PATCH_FILE!"
-                set /a APPLY_COUNT+=1
+                git apply --check "!PATCH_FILE!" >nul 2>nul
+                if !errorlevel! NEQ 0 (
+                    echo [ERROR] Cannot apply patch cleanly: "!PATCH_FILE!"
+                    set /a FAIL_COUNT+=1
+                ) else (
+                    git apply "!PATCH_FILE!"
+                    if !errorlevel! NEQ 0 (
+                        echo [ERROR] Failed to apply patch: "!PATCH_FILE!"
+                        set /a FAIL_COUNT+=1
+                    ) else (
+                        echo [OK] Applied: "!PATCH_FILE!"
+                        set /a APPLY_COUNT+=1
+                    )
+                )
             )
+
+            popd >nul
         )
     )
-
-    popd >nul
-    :continue_loop
 )
 
 if "%FOUND_PATCH%"=="0" (

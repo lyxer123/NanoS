@@ -15,7 +15,7 @@ Compared each component under `managed_components/` with its official `CHECKSUMS
 
 Patch files:
 - `patch/espressif__iot_bridge/0001-fix-windows-idf-path-normalization.patch`
-- `patch/espressif__iot_bridge/0002-avoid-spi-ethernet-phy-reset-on-dhcp-change.patch`
+- `patch/espressif__iot_bridge/0002-bridge_eth.patch`
 
 ## Components without local differences
 
